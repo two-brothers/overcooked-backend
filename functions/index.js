@@ -12,13 +12,31 @@ admin.initializeApp();
 exports.getRecipe = functions.https.onRequest(async (request, response) => {
     const id = request.query.id
 
-    const recipe = await admin
+    const firebaseRecipe = await admin
         .firestore()
         .doc(`fl_content/${id}`)
         .get()
-        .then(snapshot => snapshot.data())
+        .then(document => document.data())
+
+    // const food = await recipe['ingredients'][0]['food'].get().then(document => document.data())
+
+    const ingredients = firebaseRecipe['ingredients'].map(ingredient => {
+        return {
+            amount: ingredient['amount']
+        }
+    })
+
+    const result = {
+        id: firebaseRecipe.id,
+        title: firebaseRecipe.title,
+        serves: firebaseRecipe.serves,
+        prepTime: firebaseRecipe.prepTime,
+        cookTime: firebaseRecipe.cookTime,
+        ingredients
+    }
 
     response.status(200).json({
-        result: recipe
+        firebaseRecipe,
+        result
     })
 })
