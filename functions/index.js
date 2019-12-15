@@ -1,17 +1,14 @@
 const functions = require('firebase-functions')
 const admin = require('firebase-admin')
 
-
-// // Create and Deploy Your First Cloud Functions
-// // https://firebase.google.com/docs/functions/write-firebase-functions
-//
-// exports.helloWorld = functions.https.onRequest((request, response) => {
-//  response.send("Hello from Firebase!");
-// });
-
-
 admin.initializeApp();
 
+/**
+ * https://us-central1-overcooked-d7779.cloudfunctions.net/getRecipe?id={recipeId}
+ * 
+ * GET
+ * @param id the recipe id
+ */
 exports.getRecipe = functions.https.onRequest(async (request, response) => {
     const id = request.query.id
 
