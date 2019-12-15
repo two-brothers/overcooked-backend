@@ -20,11 +20,19 @@ exports.getRecipe = functions.https.onRequest(async (request, response) => {
 
     // const food = await recipe['ingredients'][0]['food'].get().then(document => document.data())
 
-    const ingredients = firebaseRecipe['ingredients'].map(ingredient => {
+    const ingredientsPromises = firebaseRecipe.ingredients.map(ingredient =>
+        ingredient.food.get().then(document => document.data())
+    )
+
+    const ingredients = await Promise.all(ingredientsPromises)
+
+    /* const ingredients = firebaseRecipe.ingredients.map(ingredient => {
         return {
-            amount: ingredient['amount']
+            amount: ingredient.amount,
+            description: ingredient.description,
+            ingredientType: ingredient.ingredientType
         }
-    })
+    })*/
 
     const result = {
         id: firebaseRecipe.id,
@@ -32,11 +40,12 @@ exports.getRecipe = functions.https.onRequest(async (request, response) => {
         serves: firebaseRecipe.serves,
         prepTime: firebaseRecipe.prepTime,
         cookTime: firebaseRecipe.cookTime,
-        ingredients
+        // ingredients
     }
 
     response.status(200).json({
         firebaseRecipe,
-        result
+        result,
+        ingredients
     })
 })
