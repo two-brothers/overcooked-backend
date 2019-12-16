@@ -18,21 +18,27 @@ exports.getRecipe = functions.https.onRequest(async (request, response) => {
         .get()
         .then(document => document.data())
 
-    // const food = await recipe['ingredients'][0]['food'].get().then(document => document.data())
-
-    const ingredientsPromises = firebaseRecipe.ingredients.map(ingredient =>
+    // Ingredients
+    const firebaseIngredientPromises = firebaseRecipe.ingredients.map(ingredient =>
         ingredient.food.get().then(document => document.data())
     )
 
-    const ingredients = await Promise.all(ingredientsPromises)
+    const firebaseIngredients = await Promise.all(firebaseIngredientPromises)
 
-    /* const ingredients = firebaseRecipe.ingredients.map(ingredient => {
+    const ingredients = firebaseIngredients.map(firebaseIngredient => {
         return {
-            amount: ingredient.amount,
-            description: ingredient.description,
-            ingredientType: ingredient.ingredientType
+            id: firebaseIngredient.id,
+            name: {
+                singular: firebaseIngredient.singular,
+                plural: firebaseIngredient.plural
+            },
+            conversions: firebaseIngredient.conversions.map(conversion => {
+                return {
+                    ratio: conversion.ratio
+                }
+            })
         }
-    })*/
+    })
 
     const result = {
         id: firebaseRecipe.id,
@@ -40,12 +46,11 @@ exports.getRecipe = functions.https.onRequest(async (request, response) => {
         serves: firebaseRecipe.serves,
         prepTime: firebaseRecipe.prepTime,
         cookTime: firebaseRecipe.cookTime,
-        // ingredients
+        ingredients,
+        fb_ingredients: firebaseIngredients
     }
 
     response.status(200).json({
-        firebaseRecipe,
-        result,
-        ingredients
+        result
     })
 })
