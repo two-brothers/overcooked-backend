@@ -19,7 +19,7 @@ exports.getRecipe = functions.https.onRequest(async (request, response) => {
         .then(document => document.data())
 
     // Ingredients
-    const firebaseIngredientPromises = firebaseRecipe.ingredients.map(ingredient =>
+    /* const firebaseIngredientPromises = firebaseRecipe.ingredients.map(ingredient =>
         ingredient.food.get().then(document => document.data())
     )
 
@@ -38,6 +38,16 @@ exports.getRecipe = functions.https.onRequest(async (request, response) => {
                 }
             })
         }
+    })*/
+
+    const ingredients = firebaseRecipe.ingredients.map(ingredient => {
+        return {
+            ingredientType: ingredient.ingredientType,
+            amount: ingredient.amount,
+            measurementUnit: null, // TODO: Extract measurement unit
+            food: null, // TODO: Extract food
+            description: ingredient.description
+        }
     })
 
     const result = {
@@ -47,7 +57,7 @@ exports.getRecipe = functions.https.onRequest(async (request, response) => {
         prepTime: firebaseRecipe.prepTime,
         cookTime: firebaseRecipe.cookTime,
         ingredients,
-        fb_ingredients: firebaseIngredients
+        fb_recipe: firebaseRecipe
     }
 
     response.status(200).json({
