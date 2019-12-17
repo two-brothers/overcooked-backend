@@ -1,7 +1,7 @@
 const functions = require('firebase-functions')
 const admin = require('firebase-admin')
 
-admin.initializeApp();
+admin.initializeApp()
 
 /**
  * https://us-central1-overcooked-d7779.cloudfunctions.net/getRecipe?id={recipeId}
@@ -42,10 +42,10 @@ exports.getRecipe = functions.https.onRequest(async (request, response) => {
 
     const ingredients = firebaseRecipe.ingredients.map(ingredient => {
         return {
-            ingredientType: ingredient.ingredientType,
-            amount: ingredient.amount,
-            measurementUnit: null, // TODO: Extract measurement unit
-            food: null, // TODO: Extract food
+            ingredientType: parseInt(ingredient.ingredientType),
+            amount: typeof ingredient.amount === 'string' ? null : ingredient.amount,
+            measurementUnit: ingredient.measurementUnit ? ingredient.measurementUnit.id : null,
+            food: ingredient.food ? ingredient.food.id : null,
             description: ingredient.description
         }
     })
