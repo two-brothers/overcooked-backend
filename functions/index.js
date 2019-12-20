@@ -51,16 +51,21 @@ exports.getRecipe = functions.https.onRequest(async (request, response) => {
     })
 
     const result = {
-        id: firebaseRecipe.id,
-        title: firebaseRecipe.title,
-        serves: firebaseRecipe.serves,
-        prepTime: firebaseRecipe.prepTime,
-        cookTime: firebaseRecipe.cookTime,
-        ingredients,
-        fb_recipe: firebaseRecipe
+        recipe: {
+            id: firebaseRecipe.id,
+            title: firebaseRecipe.title,
+            serves: firebaseRecipe.serves,
+            prepTime: firebaseRecipe.prepTime,
+            cookTime: firebaseRecipe.cookTime,
+            ingredients
+        },
+        food: {
+
+        }
     }
 
     response.status(200).json({
-        result
+        ...result,
+        fb_recipe: firebaseRecipe
     })
 })
