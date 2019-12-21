@@ -3,6 +3,15 @@ const admin = require('firebase-admin')
 
 admin.initializeApp()
 
+
+const arrayToObject = (array, keyField) => {
+    return array.reduce((obj, item) => {
+        obj[item[keyField]] = item
+        return obj
+    }, {})
+}
+
+
 /**
  * https://us-central1-overcooked-d7779.cloudfunctions.net/getRecipe?id={recipeId}
  * 
@@ -52,7 +61,10 @@ exports.getRecipe = functions.https.onRequest(async (request, response) => {
                 singular: foodItem.singular,
                 plural: foodItem.plural
             },
-            conversions
+            conversions: conversions.map(conversion => ({
+                ratio: conversion.ratio,
+                unitId: conversion.unit.id
+            }))
         }))
     }))
 
@@ -65,12 +77,12 @@ exports.getRecipe = functions.https.onRequest(async (request, response) => {
             cookTime: firebaseRecipe.cookTime,
             ingredients
         },
-        food
+        food: arrayToObject(food, "id")
     }
 
     response.status(200).json({
-        ...result,
-        fb_recipe: firebaseRecipe,
-        firebaseFood
+        data: {
+            ...result
+        }
     })
 })
