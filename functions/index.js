@@ -27,6 +27,7 @@ exports.getRecipeList = functions.https.onRequest(async (request, response) => {
             querySnapshot.docs.map(doc => {
                 const data = doc.data()
                 return {
+                    id: data.id,
                     title: data.title
                 }
             })
@@ -104,7 +105,8 @@ exports.getRecipe = functions.https.onRequest(async (request, response) => {
             serves: firebaseRecipe.serves,
             prepTime: firebaseRecipe.prepTime,
             cookTime: firebaseRecipe.cookTime,
-            ingredients
+            ingredients,
+            method: firebaseRecipe.method.map(item => item.step)
         },
         food: arrayToObject(food, "id")
     }
