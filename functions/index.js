@@ -39,21 +39,22 @@ exports.getRecipe = functions.https.onRequest(async (request, response) => {
 
     const firebaseFood = await Promise.all(firebaseFoodPromises)
 
-    const food = firebaseFood.map(foodItem => {
-        return {
+    const food = await Promise.all(firebaseFood.map(foodItem => {
+        const conversionsPromise = Promise.all(
+            foodItem.conversions.map(conversion =>
+                conversion.unit.get()
+                    .then(document => document.data())
+                    .then(firebaseUnit => ({ unit: firebaseUnit, ratio: conversion.ratio }))))
+
+        return conversionsPromise.then(conversions => ({
             id: foodItem.id,
             name: {
                 singular: foodItem.singular,
                 plural: foodItem.plural
             },
-            conversions: foodItem.conversions.map(conversion => {
-                return {
-                    // unit: get unit
-                    ratio: conversion.ratio
-                }
-            })
-        }
-    })
+            conversions
+        }))
+    }))
 
     const result = {
         recipe: {
