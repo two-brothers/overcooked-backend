@@ -12,11 +12,40 @@ const arrayToObject = (array, keyField) => {
 }
 
 
+
+/**
+ * https://us-central1-overcooked-d7779.cloudfunctions.net/getRecipeList
+ * GET
+ */
+exports.getRecipeList = functions.https.onRequest(async (request, response) => {
+    const recipes = await admin
+        .firestore()
+        .collection('fl_content')
+        .where('_fl_meta_.schema', '==', 'recipes')
+        .get()
+        .then(querySnapshot => (
+            querySnapshot.docs.map(doc => {
+                const data = doc.data()
+                return {
+                    title: data.title
+                }
+            })
+        ))
+
+    response.status(200).json({
+        data: {
+            recipes
+        }
+    })
+})
+
+
+
 /**
  * https://us-central1-overcooked-d7779.cloudfunctions.net/getRecipe?id={recipeId}
  * 
  * GET
- * @param id the recipe id
+ * @query id the recipe id
  */
 exports.getRecipe = functions.https.onRequest(async (request, response) => {
     const id = request.query.id
