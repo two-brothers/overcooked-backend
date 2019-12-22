@@ -60,10 +60,10 @@ exports.getRecipe = functions.https.onRequest(async (request, response) => {
     // ingredients
     const ingredients = firebaseRecipe.ingredients.map(ingredient => {
         return {
-            ingredientType: parseInt(ingredient.ingredientType),
+            ingredientTypeId: parseInt(ingredient.ingredientType),
             amount: typeof ingredient.amount === 'string' ? null : ingredient.amount,
-            measurementUnit: ingredient.measurementUnit ? ingredient.measurementUnit.id : null,
-            food: ingredient.food ? ingredient.food.id : null,
+            measurementUnitId: ingredient.measurementUnit ? ingredient.measurementUnit.id : null,
+            foodId: ingredient.food ? ingredient.food.id : null,
             description: ingredient.description
         }
     })
@@ -93,7 +93,7 @@ exports.getRecipe = functions.https.onRequest(async (request, response) => {
             },
             conversions: conversions.map(conversion => ({
                 ratio: conversion.ratio,
-                unitId: conversion.unit.id
+                measurementUnitId: conversion.unit.id
             }))
         }))
     }))
