@@ -3,6 +3,10 @@ const admin = require('firebase-admin')
 
 admin.initializeApp()
 
+const CONFIG_FILE_NAME = "{FILE_NAME}"
+const FLAMELINK_STORAGE_BASE_URL = "https://firebasestorage.googleapis.com/v0/b/overcooked-d7779.appspot.com/o/flamelink%2Fmedia%2F"
+const CONFIG_IMAGE_PATH = `${FLAMELINK_STORAGE_BASE_URL}${CONFIG_FILE_NAME}?alt=media`
+
 
 const arrayToObject = (array, keyField) => {
     return array.reduce((obj, item) => {
@@ -18,24 +22,40 @@ const arrayToObject = (array, keyField) => {
  * GET
  */
 exports.getRecipeList = functions.https.onRequest(async (request, response) => {
-    const recipes = await admin
+    const firebaseRecipes = await admin
         .firestore()
         .collection('fl_content')
         .where('_fl_meta_.schema', '==', 'recipes')
         .get()
-        .then(querySnapshot => (
-            querySnapshot.docs.map(doc => {
-                const data = doc.data()
-                return {
-                    id: data.id,
-                    title: data.title
-                }
-            })
-        ))
+
+    const heroImagePromises = firebaseRecipes.docs.reduce((acc, doc) => {
+        const data = doc.data()
+        if (data.heroImage.length > 0) {
+            acc.push(data.heroImage[0].get().then(document => document.data()))
+        }
+        return acc
+    }, [])
+
+    const heroImages = await Promise.all(heroImagePromises).then(firebaseImages => firebaseImages.map(fireabaseImage => {
+        return {
+            id: fireabaseImage.id,
+            url: CONFIG_IMAGE_PATH.replace(CONFIG_FILE_NAME, fireabaseImage.file)
+        }
+    }))
+
+    const recipes = firebaseRecipes.docs.map(doc => {
+        const data = doc.data()
+        return {
+            id: data.id,
+            title: data.title,
+            heroImageId: data.heroImage.length ? data.heroImage[0].id : null
+        }
+    })
 
     response.status(200).json({
         data: {
-            recipes
+            recipes,
+            heroImages
         }
     })
 })
