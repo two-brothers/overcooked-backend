@@ -36,26 +36,23 @@ exports.getRecipeList = functions.https.onRequest(async (request, response) => {
         return acc
     }, [])
 
-    const heroImages = await Promise.all(heroImagePromises).then(firebaseImages => firebaseImages.map(fireabaseImage => {
-        return {
-            id: fireabaseImage.id,
-            url: CONFIG_IMAGE_PATH.replace(CONFIG_FILE_NAME, fireabaseImage.file)
-        }
-    }))
+    const heroImageMap = await Promise.all(heroImagePromises).then(firebaseImages => firebaseImages.reduce((acc, fireabaseImage) => {
+        acc[fireabaseImage.id] = CONFIG_IMAGE_PATH.replace(CONFIG_FILE_NAME, fireabaseImage.file)
+        return acc
+    }, {}))
 
     const recipes = firebaseRecipes.docs.map(doc => {
         const data = doc.data()
         return {
             id: data.id,
             title: data.title,
-            heroImageId: data.heroImage.length ? data.heroImage[0].id : null
+            heroImageUrl: data.heroImage.length > 0 && heroImageMap[data.heroImage[0].id] ? heroImageMap[data.heroImage[0].id] : ""
         }
     })
 
     response.status(200).json({
         data: {
-            recipes,
-            heroImages
+            recipes
         }
     })
 })
