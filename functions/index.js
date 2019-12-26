@@ -74,6 +74,9 @@ exports.getRecipe = functions.https.onRequest(async (request, response) => {
         .get()
         .then(document => document.data())
 
+    // hero image
+    const heroImage = firebaseRecipe.heroImage.length > 0 ? await firebaseRecipe.heroImage[0].get().then(doc => doc.data()) : ''
+
     // ingredients
     const ingredients = firebaseRecipe.ingredients.map(ingredient => {
         return {
@@ -119,6 +122,7 @@ exports.getRecipe = functions.https.onRequest(async (request, response) => {
         recipe: {
             id: firebaseRecipe.id,
             title: firebaseRecipe.title,
+            heroImageUrl: CONFIG_IMAGE_PATH.replace(CONFIG_FILE_NAME, heroImage.file),
             serves: firebaseRecipe.serves,
             prepTime: firebaseRecipe.prepTime,
             cookTime: firebaseRecipe.cookTime,
