@@ -127,7 +127,9 @@ exports.getRecipe = functions.https.onRequest(async (request, response) => {
             prepTime: firebaseRecipe.prepTime,
             cookTime: firebaseRecipe.cookTime,
             ingredients,
-            method: firebaseRecipe.method.map(item => item.step)
+            method: firebaseRecipe.method.map(item => item.step),
+            referenceName: firebaseRecipe.referenceName,
+            referenceUrl: firebaseRecipe.referenceUrl
         },
         food: arrayToObject(food, "id")
     }
