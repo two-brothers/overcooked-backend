@@ -83,6 +83,7 @@ exports.getRecipe = functions.https.onRequest(async (request, response) => {
             ingredientTypeId: parseInt(ingredient.ingredientType),
             amount: typeof ingredient.amount === 'string' ? null : ingredient.amount,
             measurementUnitId: ingredient.measurementUnit ? ingredient.measurementUnit.id : null,
+            alternateMeasurementUnitId: ingredient.alternateMeasurementUnit ? ingredient.alternateMeasurementUnit.id : null,
             foodId: ingredient.food ? ingredient.food.id : null,
             description: ingredient.description
         }
