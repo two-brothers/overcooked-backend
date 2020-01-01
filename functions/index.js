@@ -119,6 +119,11 @@ exports.getRecipe = functions.https.onRequest(async (request, response) => {
         }))
     }))
 
+    // interactive
+    const interactive = firebaseRecipe.interactive ? firebaseRecipe.interactive.map(step => ({
+        title: step.title
+    })) : null
+
     const result = {
         recipe: {
             id: firebaseRecipe.id,
@@ -130,7 +135,8 @@ exports.getRecipe = functions.https.onRequest(async (request, response) => {
             ingredients,
             method: firebaseRecipe.method.map(item => item.step),
             referenceName: firebaseRecipe.referenceName,
-            referenceUrl: firebaseRecipe.referenceUrl
+            referenceUrl: firebaseRecipe.referenceUrl,
+            interactive: interactive
         },
         food: arrayToObject(food, "id")
     }
