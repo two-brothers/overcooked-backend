@@ -147,3 +147,41 @@ exports.getRecipe = functions.https.onRequest(async (request, response) => {
         }
     })
 })
+
+/**
+ * https://us-central1-overcooked-d7779.cloudfunctions.net/getRecipeV2?id={recipeId}
+ * 
+ * GET
+ * @query id the recipe id
+ */
+exports.getRecipeV2 = functions.https.onRequest(async (request, response) => {
+    const id = request.query.id
+
+    const firebaseRecipe = await admin
+        .firestore()
+        .doc(`fl_content/${id}`)
+        .get()
+        .then(document => document.data())
+
+    // hero image
+    const heroImage = firebaseRecipe.heroImage.length > 0 ? await firebaseRecipe.heroImage[0].get().then(doc => doc.data()) : ''
+
+    const result = {
+        recipe: {
+            id: firebaseRecipe.id,
+            title: firebaseRecipe.title,
+            heroImageUrl: CONFIG_IMAGE_PATH.replace(CONFIG_FILE_NAME, heroImage.file),
+            serves: firebaseRecipe.serves,
+            prepTime: firebaseRecipe.prepTime,
+            cookTime: firebaseRecipe.cookTime,
+            referenceName: firebaseRecipe.referenceName,
+            referenceUrl: firebaseRecipe.referenceUrl
+        }
+    }
+
+    response.status(200).json({
+        data: {
+            ...result
+        }
+    })
+})
