@@ -172,12 +172,7 @@ exports.getRecipeV2 = functions.https.onRequest(async (request, response) => {
 
     // method
     const method = firebaseRecipe.components.reduce((acc, component) => {
-        component.method.forEach(methodStep => {
-            const textDescription = methodStep.textDescription.trim()
-            if (textDescription.length > 0) {
-                acc.push(textDescription)
-            }
-        })
+        component.method.forEach(methodStep => acc.push(methodStep))
         return acc
     }, [])
 
@@ -187,7 +182,6 @@ exports.getRecipeV2 = functions.https.onRequest(async (request, response) => {
             Array.isArray(methodStep.ingredients) && methodStep.ingredients.forEach(ingredient => {
                 if (ingredient.addToIngredients === "1") {
                     const foodId = ingredient.food.trim()
-                    const description = ingredient.description.trim()
                     if (foodId.length > 0) {
                         acc.push({
                             ingredientTypeId: IngredientType.QUANTIFIED,
@@ -196,7 +190,7 @@ exports.getRecipeV2 = functions.https.onRequest(async (request, response) => {
                     } else {
                         acc.push({
                             ingredientTypeId: IngredientType.FREE_TEXT,
-                            description
+                            description: ingredient.description.trim()
                         })
                     }
                 }
