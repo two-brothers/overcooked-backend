@@ -15,6 +15,10 @@ const arrayToObject = (array, keyField) => {
     }, {})
 }
 
+const IngredientType = {
+    QUANTIFIED: 0,
+    FREE_TEXT: 1
+}
 
 
 /**
@@ -177,6 +181,30 @@ exports.getRecipeV2 = functions.https.onRequest(async (request, response) => {
         return acc
     }, [])
 
+    // ingredients
+    const ingredients = firebaseRecipe.components.reduce((acc, component) => {
+        component.method.forEach(methodStep => {
+            Array.isArray(methodStep.ingredients) && methodStep.ingredients.forEach(ingredient => {
+                if (ingredient.addToIngredients === "1") {
+                    const foodId = ingredient.food.trim()
+                    const description = ingredient.description.trim()
+                    if (foodId.length > 0) {
+                        acc.push({
+                            ingredientTypeId: IngredientType.QUANTIFIED,
+                            foodId
+                        })
+                    } else {
+                        acc.push({
+                            ingredientTypeId: IngredientType.FREE_TEXT,
+                            description
+                        })
+                    }
+                }
+            })
+        })
+        return acc
+    }, [])
+
     const result = {
         recipe: {
             id: firebaseRecipe.id,
@@ -187,6 +215,7 @@ exports.getRecipeV2 = functions.https.onRequest(async (request, response) => {
             cookTime: firebaseRecipe.cookTime,
             referenceName: firebaseRecipe.referenceName,
             referenceUrl: firebaseRecipe.referenceUrl,
+            ingredients,
             method
         }
     }
