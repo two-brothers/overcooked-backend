@@ -16,8 +16,9 @@ const arrayToObject = (array, keyField) => {
 }
 
 const IngredientType = {
-    QUANTIFIED: 0,
-    FREE_TEXT: 1
+    HEADING: 0,
+    QUANTIFIED: 1,
+    FREE_TEXT: 2
 }
 
 
@@ -172,7 +173,7 @@ exports.getRecipeV2 = functions.https.onRequest(async (request, response) => {
 
     // method
     const method = firebaseRecipe.components.reduce((acc, component) => {
-        component.method.forEach(methodStep => acc.push(methodStep))
+        component.method.forEach(methodStep => acc.push(methodStep.textDescription.trim()))
         return acc
     }, [])
 
@@ -199,6 +200,41 @@ exports.getRecipeV2 = functions.https.onRequest(async (request, response) => {
         return acc
     }, [])
 
+    // food
+    const firebaseFoodPromises = firebaseRecipe.components.reduce((acc, component) => {
+        component.method.forEach(methodStep => {
+            Array.isArray(methodStep.ingredients) && methodStep.ingredients.forEach(ingredient => {
+                if (ingredient.food.trim().length > 0 && ingredient.addToIngredients === "1") {
+                    acc.push(admin.firestore().doc(`fl_content/${ingredient.food}`).get().then(document => document.data()))
+                }
+            })
+        })
+        return acc
+    }, [])
+
+    const firebaseFood = await Promise.all(firebaseFoodPromises)
+
+    const food = await Promise.all(firebaseFood.map(foodItem => {
+        const conversionsPromise = Promise.all(
+            foodItem.conversions.map(conversion =>
+                conversion.unit.get()
+                    .then(document => document.data())
+                    .then(firebaseUnit => ({ unit: firebaseUnit, ratio: conversion.ratio }))))
+
+        return conversionsPromise.then(conversions => ({
+            id: foodItem.id,
+            name: {
+                singular: foodItem.singular,
+                plural: foodItem.plural
+            },
+            conversions: conversions.map(conversion => ({
+                ratio: conversion.ratio,
+                measurementUnitId: conversion.unit.id
+            }))
+        }))
+    }))
+
+    // result
     const result = {
         recipe: {
             id: firebaseRecipe.id,
@@ -211,7 +247,8 @@ exports.getRecipeV2 = functions.https.onRequest(async (request, response) => {
             referenceUrl: firebaseRecipe.referenceUrl,
             ingredients,
             method
-        }
+        },
+        food: arrayToObject(food, "id")
     }
 
     response.status(200).json({
