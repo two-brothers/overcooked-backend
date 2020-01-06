@@ -166,6 +166,17 @@ exports.getRecipeV2 = functions.https.onRequest(async (request, response) => {
     // hero image
     const heroImage = firebaseRecipe.heroImage.length > 0 ? await firebaseRecipe.heroImage[0].get().then(doc => doc.data()) : ''
 
+    // method
+    const method = firebaseRecipe.components.reduce((acc, component) => {
+        component.method.forEach(methodStep => {
+            const textDescription = methodStep.textDescription.trim()
+            if (textDescription.length > 0) {
+                acc.push(textDescription)
+            }
+        })
+        return acc
+    }, [])
+
     const result = {
         recipe: {
             id: firebaseRecipe.id,
@@ -175,7 +186,8 @@ exports.getRecipeV2 = functions.https.onRequest(async (request, response) => {
             prepTime: firebaseRecipe.prepTime,
             cookTime: firebaseRecipe.cookTime,
             referenceName: firebaseRecipe.referenceName,
-            referenceUrl: firebaseRecipe.referenceUrl
+            referenceUrl: firebaseRecipe.referenceUrl,
+            method
         }
     }
 
