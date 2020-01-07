@@ -179,6 +179,13 @@ exports.getRecipeV2 = functions.https.onRequest(async (request, response) => {
 
     // ingredients
     const ingredients = firebaseRecipe.components.reduce((acc, component) => {
+        const heading = component.heading.trim()
+        if (heading.length > 0) {
+            acc.push({
+                ingredientTypeId: IngredientType.HEADING,
+                title: heading
+            })
+        }
         component.method.forEach(methodStep => {
             Array.isArray(methodStep.ingredients) && methodStep.ingredients.forEach(ingredient => {
                 if (ingredient.addToIngredients === "1") {
