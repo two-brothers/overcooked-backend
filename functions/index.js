@@ -196,7 +196,8 @@ exports.getRecipeV2 = functions.https.onRequest(async (request, response) => {
                             quantity: ingredient.quantity,
                             measurementUnitId: ingredient.measurementUnit,
                             alternateMeasurementUnitId: ingredient.alternateMeasurementUnit ? ingredient.alternateMeasurementUnit : null,
-                            foodId
+                            foodId,
+                            description: ingredient.description.trim()
                         })
                     } else {
                         acc.push({
@@ -279,7 +280,7 @@ exports.getRecipeV2 = functions.https.onRequest(async (request, response) => {
             referenceUrl: firebaseRecipe.referenceUrl,
             ingredients,
             method,
-            components
+            interactive: components
         },
         food: arrayToObject(food, "id")
     }
