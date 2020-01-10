@@ -193,6 +193,9 @@ exports.getRecipeV2 = functions.https.onRequest(async (request, response) => {
                     if (foodId.length > 0) {
                         acc.push({
                             ingredientTypeId: IngredientType.QUANTIFIED,
+                            quantity: ingredient.quantity,
+                            measurementUnitId: ingredient.measurementUnit,
+                            alternateMeasurementUnitId: ingredient.alternateMeasurementUnit ? ingredient.alternateMeasurementUnit : null,
                             foodId
                         })
                     } else {
