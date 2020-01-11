@@ -211,8 +211,8 @@ exports.getRecipeV2 = functions.https.onRequest(async (request, response) => {
         return acc
     }, [])
 
-    // components
-    const components = firebaseRecipe.components.reduce((acc, component) => {
+    // interactive
+    const interactive = firebaseRecipe.components.reduce((acc, component) => {
         component.method.forEach(methodStep => {
             const timer = Number.isInteger(methodStep.timer) ? methodStep.timer : null
             const ingredients = Array.isArray(methodStep.ingredients) ? methodStep.ingredients.map(ingredient => ({
@@ -226,7 +226,6 @@ exports.getRecipeV2 = functions.https.onRequest(async (request, response) => {
                 body: methodStep.body,
                 ingredients: ingredients,
                 footnote: methodStep.footnote,
-                textDescription: methodStep.textDescription,
                 timer: timer
             })
         })
@@ -280,7 +279,7 @@ exports.getRecipeV2 = functions.https.onRequest(async (request, response) => {
             referenceUrl: firebaseRecipe.referenceUrl,
             ingredients,
             method,
-            interactive: components
+            interactive
         },
         food: arrayToObject(food, "id")
     }
