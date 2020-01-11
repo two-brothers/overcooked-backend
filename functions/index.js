@@ -215,12 +215,24 @@ exports.getRecipeV2 = functions.https.onRequest(async (request, response) => {
     const interactive = firebaseRecipe.components.reduce((acc, component) => {
         component.method.forEach(methodStep => {
             const timer = Number.isInteger(methodStep.timer) ? methodStep.timer : null
-            const ingredients = Array.isArray(methodStep.ingredients) ? methodStep.ingredients.map(ingredient => ({
-                food: ingredient.food.length > 0 ? ingredient.food : null,
-                description: ingredient.description,
-                measurementUnit: ingredient.measurementUnit.length > 0 ? ingredient.measurementUnit : null,
-                quantity: typeof ingredient.quantity === "number" ? ingredient.quantity : null
-            })) : null
+            const ingredients = Array.isArray(methodStep.ingredients) ? methodStep.ingredients.map(ingredient => {
+                const foodId = ingredient.food.trim()
+                if (foodId.length > 0) {
+                    return {
+                        ingredientTypeId: IngredientType.QUANTIFIED,
+                        quantity: ingredient.quantity,
+                        measurementUnitId: ingredient.measurementUnit,
+                        alternateMeasurementUnitId: ingredient.alternateMeasurementUnit ? ingredient.alternateMeasurementUnit : null,
+                        foodId,
+                        description: ingredient.description
+                    }
+                } else {
+                    return {
+                        ingredientTypeId: IngredientType.FREE_TEXT,
+                        description: ingredient.description.trim()
+                    }
+                }
+            }) : null
             acc.push({
                 title: methodStep.title,
                 body: methodStep.body,
