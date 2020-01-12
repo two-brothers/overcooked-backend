@@ -21,6 +21,11 @@ const IngredientType = {
     FREE_TEXT: 2
 }
 
+const Environment = {
+    PRODUCTION: 0,
+    DEVELOPMENT: 1
+}
+
 
 /**
  * https://us-central1-overcooked-d7779.cloudfunctions.net/getRecipeList
@@ -110,14 +115,25 @@ exports.getRecipeList = functions.https.onRequest(async (request, response) => {
  */
 exports.getRecipes = functions.https.onRequest(async (request, response) => {
     const v = parseFloat(request.query.v)
+    const env = parseInt(request.query.env)
 
     if (v === 1.1) {
-        const firebaseRecipes = await admin
-            .firestore()
-            .collection('fl_content')
-            .where('_fl_meta_.schema', '==', 'recipes')
-            .where('isPublished', '==', true)
-            .get()
+        var firebaseRecipes = null
+
+        if (env === Environment.DEVELOPMENT) {
+            firebaseRecipes = await admin
+                .firestore()
+                .collection('fl_content')
+                .where('_fl_meta_.schema', '==', 'recipes')
+                .get()
+        } else {
+            firebaseRecipes = await admin
+                .firestore()
+                .collection('fl_content')
+                .where('_fl_meta_.schema', '==', 'recipes')
+                .where('isPublished', '==', true)
+                .get()
+        }
 
         const heroImagePromises = firebaseRecipes.docs.reduce((acc, doc) => {
             const data = doc.data()
