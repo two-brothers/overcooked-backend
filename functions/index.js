@@ -267,7 +267,7 @@ exports.getRecipe = functions.https.onRequest(async (request, response) => {
         const firebaseFoodPromises = firebaseRecipe.components.reduce((acc, component) => {
             component.method.forEach(methodStep => {
                 Array.isArray(methodStep.ingredients) && methodStep.ingredients.forEach(ingredient => {
-                    if (ingredient.food.trim().length > 0 && ingredient.addToIngredients === "1") {
+                    if (ingredient.food.trim().length > 0) {
                         acc.push(admin.firestore().doc(`fl_content/${ingredient.food}`).get().then(document => document.data()))
                     }
                 })
