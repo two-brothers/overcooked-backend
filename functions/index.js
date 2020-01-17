@@ -125,6 +125,7 @@ exports.getRecipes = functions.https.onRequest(async (request, response) => {
                 .firestore()
                 .collection('fl_content')
                 .where('_fl_meta_.schema', '==', 'recipes')
+                .orderBy('_fl_meta_.createdDate', 'desc')
                 .get()
         } else {
             firebaseRecipes = await admin
@@ -132,6 +133,7 @@ exports.getRecipes = functions.https.onRequest(async (request, response) => {
                 .collection('fl_content')
                 .where('_fl_meta_.schema', '==', 'recipes')
                 .where('isPublished', '==', true)
+                .orderBy('_fl_meta_.createdDate', 'desc')
                 .get()
         }
 
