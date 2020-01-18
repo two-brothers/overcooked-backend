@@ -1,5 +1,7 @@
 const functions = require('firebase-functions')
 const admin = require('firebase-admin')
+const { IngredientType } = require('./lookups/ingredientType.js')
+const { Environment } = require('./lookups/environment.js')
 
 admin.initializeApp()
 
@@ -13,17 +15,6 @@ const arrayToObject = (array, keyField) => {
         obj[item[keyField]] = item
         return obj
     }, {})
-}
-
-const IngredientType = {
-    HEADING: 0,
-    QUANTIFIED: 1,
-    FREE_TEXT: 2
-}
-
-const Environment = {
-    PRODUCTION: 0,
-    DEVELOPMENT: 1
 }
 
 
@@ -159,11 +150,24 @@ exports.getRecipes = functions.https.onRequest(async (request, response) => {
             }
         })
 
-        response.status(200).json({
-            data: {
-                recipes
-            }
-        })
+        if (env === Environment.DEVELOPMENT) {
+            response
+                .status(200)
+                .json({
+                    data: {
+                        recipes
+                    }
+                })
+        } else {
+            response
+                .set('Cache-Control', 'public, max-age=432000, s-maxage=432000')
+                .status(200)
+                .json({
+                    data: {
+                        recipes
+                    }
+                })
+        }
 
         return
     }
@@ -178,6 +182,7 @@ exports.getRecipes = functions.https.onRequest(async (request, response) => {
  */
 exports.getRecipe = functions.https.onRequest(async (request, response) => {
     const v = parseFloat(request.query.v)
+    const env = parseInt(request.query.env)
     const id = request.query.id
 
     if (v === 1.1) {
@@ -315,11 +320,24 @@ exports.getRecipe = functions.https.onRequest(async (request, response) => {
             food: arrayToObject(food, "id")
         }
 
-        response.status(200).json({
-            data: {
-                ...result
-            }
-        })
+        if (env === Environment.DEVELOPMENT) {
+            response
+                .status(200)
+                .json({
+                    data: {
+                        ...result
+                    }
+                })
+        } else  {
+            response
+                .set('Cache-Control', 'public, max-age=432000, s-maxage=432000')
+                .status(200)
+                .json({
+                    data: {
+                        ...result
+                    }
+                })
+        }
         return
     }
 
