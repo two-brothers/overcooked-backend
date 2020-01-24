@@ -19,88 +19,6 @@ const arrayToObject = (array, keyField) => {
 
 
 /**
- * https://us-central1-overcooked-d7779.cloudfunctions.net/getRecipeList
- * GET
- */
-exports.getRecipeList = functions.https.onRequest(async (request, response) => {
-    const v = parseFloat(request.query.v)
-
-    if (v === 1.1) {
-        const firebaseRecipes = await admin
-            .firestore()
-            .collection('fl_content')
-            .where('_fl_meta_.schema', '==', 'recipes')
-            .where('isPublished', '==', true)
-            .get()
-
-        const heroImagePromises = firebaseRecipes.docs.reduce((acc, doc) => {
-            const data = doc.data()
-            if (data.heroImage.length > 0) {
-                acc.push(data.heroImage[0].get().then(document => document.data()))
-            }
-            return acc
-        }, [])
-
-        const heroImageMap = await Promise.all(heroImagePromises).then(firebaseImages => firebaseImages.reduce((acc, fireabaseImage) => {
-            acc[fireabaseImage.id] = CONFIG_IMAGE_PATH.replace(CONFIG_FILE_NAME, fireabaseImage.file)
-            return acc
-        }, {}))
-
-        const recipes = firebaseRecipes.docs.map(doc => {
-            const data = doc.data()
-            return {
-                id: data.id,
-                title: data.title,
-                heroImageUrl: data.heroImage.length > 0 && heroImageMap[data.heroImage[0].id] ? heroImageMap[data.heroImage[0].id] : ""
-            }
-        })
-
-        response.status(200).json({
-            data: {
-                recipes
-            }
-        })
-
-        return
-    }
-
-    const firebaseRecipes = await admin
-        .firestore()
-        .collection('fl_content')
-        .where('_fl_meta_.schema', '==', 'recipes')
-        .get()
-
-    const heroImagePromises = firebaseRecipes.docs.reduce((acc, doc) => {
-        const data = doc.data()
-        if (data.heroImage.length > 0) {
-            acc.push(data.heroImage[0].get().then(document => document.data()))
-        }
-        return acc
-    }, [])
-
-    const heroImageMap = await Promise.all(heroImagePromises).then(firebaseImages => firebaseImages.reduce((acc, fireabaseImage) => {
-        acc[fireabaseImage.id] = CONFIG_IMAGE_PATH.replace(CONFIG_FILE_NAME, fireabaseImage.file)
-        return acc
-    }, {}))
-
-    const recipes = firebaseRecipes.docs.map(doc => {
-        const data = doc.data()
-        return {
-            id: data.id,
-            title: data.title,
-            heroImageUrl: data.heroImage.length > 0 && heroImageMap[data.heroImage[0].id] ? heroImageMap[data.heroImage[0].id] : ""
-        }
-    })
-
-    response.status(200).json({
-        data: {
-            recipes
-        }
-    })
-})
-
-
-/**
  * https://us-central1-overcooked-d7779.cloudfunctions.net/getRecipes
  * GET
  */
@@ -146,7 +64,9 @@ exports.getRecipes = functions.https.onRequest(async (request, response) => {
             return {
                 id: data.id,
                 title: data.title,
-                heroImageUrl: data.heroImage.length > 0 && heroImageMap[data.heroImage[0].id] ? heroImageMap[data.heroImage[0].id] : ""
+                heroImageUrl: data.heroImage.length > 0 && heroImageMap[data.heroImage[0].id] ? heroImageMap[data.heroImage[0].id] : "",
+                prepTime: data.prepTime,
+                cookTime: data.cookTime
             }
         })
 
