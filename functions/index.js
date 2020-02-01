@@ -65,8 +65,8 @@ exports.getRecipes = functions.https.onRequest(async (request, response) => {
                 id: data.id,
                 title: data.title,
                 heroImageUrl: data.heroImage.length > 0 && heroImageMap[data.heroImage[0].id] ? heroImageMap[data.heroImage[0].id] : "",
-                prepTime: data.prepTime,
-                cookTime: data.cookTime
+                prepTime: parseInt(data.prepTime),
+                cookTime: parseInt(data.cookTime)
             }
         })
 
